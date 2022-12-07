@@ -2,9 +2,13 @@
   <div>
     <div>
       <h3>Orders</h3>
-      {{orders}}
+      <ul>
+        <li v-for="(o, i) in orders">{{o}}</li>
+      </ul>
+      <span v-if="!create"><q-btn @click="create=true" label="Add" color="primary" size="sm"/> a new order.  When possible, it is recommended to only have one order per submission.</span>
     </div>
-    
+    <fieldset v-if="create">
+      <legend>Create a new order</legend>
     <q-table
       title="Services"
       :data="services"
@@ -35,7 +39,8 @@
     
     <q-input label="username" v-model="neworder.username"/>
     <q-input label="quantity" type="number" v-model="neworder.quantity"/>
-    <q-btn label="Create order" @click="createOrder" :disabled="(invalid_order || processing)"/>
+    <q-btn color="primary" label="Create order" @click="createOrder" :disabled="(invalid_order || processing)"/>
+  </fieldset>
   </div>
 </template>
 
@@ -49,7 +54,9 @@ export default {
       orders: [],
       filter: '',
       neworder: {},
-      processing: false
+      processing: false,
+      mounted: false,
+      create: false
     }
   },
   methods: {
@@ -67,8 +74,9 @@ export default {
           this.neworder = {}
         })
         .catch((error) => {
-          if (error.response && error.response.status !== 404) {
-            this.$q.notify({message: 'There was an error creating the order.', type: 'negative'})
+          if (error.response) {
+            var reason = error.response.data && error.response.data.detail ? error.response.data.detail : ''
+            this.$q.notify({message: 'There was an error creating the order. '+reason, type: 'negative'})
             this.processing = false
           }
         })
@@ -76,6 +84,7 @@ export default {
     }
   },
   mounted () {
+    console.log('services', this.services) // this should only happen once thanks to keep-alive, but it doesn't appear to be the case
     this.$axios
         .get(`/api/plugins/ppms/submissions/${this.submission.id}/services/`)
         .then((response) => {
