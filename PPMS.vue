@@ -3,9 +3,9 @@
     <div>
       <h3>Orders</h3>
       <ul>
-        <li v-for="(o, i) in orders">{{o}}</li>
+        <li v-for="(o, i) in orders"><a target="_blank" :href="`https://ppms.us/ucdavis-test/vorder/?orderid=${o}`">Order #{{o}}</a></li>
       </ul>
-      <span v-if="!create"><q-btn @click="create=true" label="Add" color="primary" size="sm"/> a new order.  When possible, it is recommended to only have one order per submission.</span>
+      <span v-if="!create"><q-btn @click="create=true" label="Add" color="primary" size="sm"/> a new order.  <span class="text-negative">It is recommended to only have one order per submission whenever possible.</span></span>
     </div>
     <fieldset v-if="create">
       <legend>Create a new order</legend>
@@ -39,7 +39,7 @@
     
     <q-input label="username" v-model="neworder.username"/>
     <q-input label="quantity" type="number" v-model="neworder.quantity"/>
-    <q-btn color="primary" label="Create order" @click="createOrder" :disabled="(invalid_order || processing)"/>
+    <q-btn color="primary" label="Create order" @click="createOrder" :disabled="(invalid_order || processing)"/> <q-btn label="cancel" color="red" @click="create=false"/>
   </fieldset>
   </div>
 </template>
@@ -69,9 +69,10 @@ export default {
         this.$axios
         .post(`/api/plugins/ppms/submissions/${this.submission.id}/create_order/`, this.neworder)
         .then((response) => {
-          this.orders = response.data.orders
+          this.orders = response.data.plugin_data.orders
           this.processing = false
           this.neworder = {}
+          this.$q.notify({message: `PPMS Order #${response.data.order} successfully created. `, type: 'positive'})
         })
         .catch((error) => {
           if (error.response) {
@@ -99,6 +100,9 @@ export default {
         .get(`/api/plugins/ppms/submissions/${this.submission.id}/orders/`)
         .then((response) => {
           this.orders = response.data.orders
+          if (this.orders.length == 0) {
+            this.create = true
+          }
         })
         .catch((error) => {
           if (error.response && error.response.status !== 404) {
