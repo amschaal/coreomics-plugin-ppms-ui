@@ -1,6 +1,11 @@
 <template>
   <div>
     <div>
+      <div if submission.payment.group>
+        <h3>Group</h3>
+        <span v-for="v,k in groupFields"><b>{{ v }}:</b>{{ submission.payment.group[k] }}<br></span>
+        {{ submission.payment.group }}
+      </div>
       <h3>Orders</h3>
       <ul>
         <li v-for="(o, i) in orders"><a target="_blank" :href="`https://ppms.us/ucdavis-test/vorder/?orderid=${o}`">Order #{{o}}</a></li>
@@ -56,7 +61,8 @@ export default {
       neworder: {},
       processing: false,
       mounted: false,
-      create: false
+      create: false,
+      groupFields: {'admname': 'Admin Name', 'admemail': 'Admin Email', 'headname': 'Head Name', 'unitname': 'Unit Name', 'heademail': 'Head Email', 'department': 'Department', 'affiliation': 'Affiliation', 'institution': 'Institution'}
     }
   },
   methods: {
