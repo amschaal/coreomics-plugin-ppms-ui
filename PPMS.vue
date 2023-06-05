@@ -12,6 +12,27 @@
       </ul>
       <span v-if="!create"><q-btn @click="create=true" label="Add" color="primary" size="sm"/> a new order.  <span class="text-negative">It is recommended to only have one order per submission whenever possible.</span></span>
     </div>
+    <q-table
+      title="Users"
+      :data="accounts"
+      row-key="UserID"
+      :dense="true"
+      :filter="filter"
+    >
+      <template v-slot:top-left>
+        <b>Users</b>
+        <q-input borderless dense debounce="300" v-model="user_filter" placeholder="Search">
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+      <template v-slot:body-cell-UserID="props">
+        <q-td :props="props">
+          <a :href="`https://ppms.us/ucdavis-test/order/?userid=${props.value}`" target="_blank">Create order</a>
+        </q-td>
+      </template>
+    </q-table>
     <fieldset v-if="create">
       <legend>Create a new order</legend>
     <q-table
@@ -57,6 +78,7 @@ export default {
       services: [],
       selected: [],
       orders: [],
+      accounts: [],
       filter: '',
       neworder: {},
       processing: false,
@@ -113,6 +135,16 @@ export default {
         .catch((error) => {
           if (error.response && error.response.status !== 404) {
             this.$q.notify({message: 'There was an error retrieving the orders for this submission.', type: 'negative'})
+          }
+        })
+      this.$axios
+        .get(`/api/plugins/ppms/submissions/${this.submission.id}/user_info/`)
+        .then((response) => {
+          this.accounts = response.data
+        })
+        .catch((error) => {
+          if (error.response && error.response.status !== 404) {
+            this.$q.notify({message: 'Unable to fetch user account info using PI and submitter emails.', type: 'negative'})
           }
         })
   },
