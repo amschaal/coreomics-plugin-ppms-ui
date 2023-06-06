@@ -6,6 +6,7 @@
         <span v-for="v,k in groupFields"><b>{{ v }}:</b>{{ submission.payment.group[k] }}<br></span>
         {{ submission.payment.group }}
       </div>
+      <OrderSearch :submission="submission"/>
       <h3>Orders</h3>
       <ul>
         <li v-for="(o, i) in orders"><a target="_blank" :href="`https://ppms.us/ucdavis-test/vorder/?orderid=${o}`">Order #{{o}}</a></li>
@@ -41,7 +42,7 @@
           <div class="text-h6" v-if="user">Create order for "{{ user['First Name'] }} {{ user['LastName'] }}, {{ user.Email }}"</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <a :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS.
+          <a v-if="user" :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS.
           <fieldset v-if="create">
             <legend>Create a new order (limited to 1 service)</legend>
           <q-table
@@ -86,6 +87,8 @@
 </template>
 
 <script>
+import OrderSearch from './OrderSearch.vue'
+
 export default {
   props: ['submission', 'config'],
   data () {
@@ -95,6 +98,7 @@ export default {
       orders: [],
       accounts: [],
       filter: '',
+      user_filter: '',
       neworder: {},
       user: null,
       processing: false,
@@ -174,6 +178,9 @@ export default {
     'invalid_order': function () {
       return !this.service || !this.neworder.username || !this.neworder.quantity
     }
+  },
+  components: {
+    OrderSearch
   }
 }
 </script>
