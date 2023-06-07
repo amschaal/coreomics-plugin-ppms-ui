@@ -4,82 +4,96 @@
       <div if submission.payment.group>
         <h3>Group</h3>
         <span v-for="v,k in groupFields"><b>{{ v }}:</b>{{ submission.payment.group[k] }}<br></span>
-        {{ submission.payment.group }}
       </div>
-      <OrderSearch :submission="submission"/>
       <h3>Orders</h3>
       <ul>
         <li v-for="(o, i) in orders"><a target="_blank" :href="`https://ppms.us/ucdavis-test/vorder/?orderid=${o}`">Order #{{o}}</a></li>
       </ul>
-      <span v-if="!create"><q-btn @click="create=true" label="Add" color="primary" size="sm"/> a new order.  <span class="text-negative">It is recommended to only have one order per submission whenever possible.</span></span>
     </div>
-    <q-table
-      title="Users"
-      :data="accounts"
-      row-key="UserID"
-      :dense="true"
-      :filter="filter"
-    >
-      <template v-slot:top-left>
-        <b>Users</b>
-        <q-input borderless dense debounce="300" v-model="user_filter" placeholder="Search">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-      <template v-slot:body-cell-UserID="props">
-        <q-td :props="props">
-          <q-btn label="Create order" size="xs" @click="openOrderDialog(props.row)"/>
-        </q-td>
-      </template>
-    </q-table>
+    <OrderSearch :submission="submission"/>
+    <q-btn label="Create order" @click="openOrderDialog()"/>
     <q-dialog
       v-model="create"
     >
-      <q-card style="width: 700px; max-width: 80vw;">
+      <q-card style="width: 80vw; max-width: 80vw;">
         <q-card-section>
-          <div class="text-h6" v-if="user">Create order for "{{ user['First Name'] }} {{ user['LastName'] }}, {{ user.Email }}"</div>
+          <div class="text-h4">Create a new order in PPMS</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <a v-if="user" :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS.
-          <fieldset v-if="create">
-            <legend>Create a new order (limited to 1 service)</legend>
-          <q-table
-            title="Services"
-            :data="services"
-            row-key="Service id"
-            :dense="true"
-            :filter="filter"
-            selection="single"
-            :selected.sync="selected"
-            v-if="!service"
-          >
-            <template v-slot:top-left>
-              <b>Services</b>
-              <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-            </template>
-          </q-table>
-          <q-field label="Service" hint="The PPMS API requires exactly one service to be chosen for new order creation.  After the order is created, services may be modified within PPMS itself.">
-              <template v-slot:control>
-                <div class="self-center full-width no-outline" tabindex="0">
-                  <span v-if="service">{{service['Service id']}} - {{service['Name']}} <q-btn label="Change service" @click="selected=[]"/></span>
-                  <span v-else>*Please select a service from the table above!</span>
-                </div>
+          <div>
+            <div class="text-h5">Step 1: Select a user for order creation</div>
+            <q-table
+              title="Users"
+              :data="accounts"
+              row-key="UserID"
+              :dense="true"
+              :filter="filter"
+              selection="single"
+              :selected.sync="user_selection"
+            >
+              <template v-slot:top-left>
+                <b>Users</b>
+                <q-input borderless dense debounce="300" v-model="user_filter" placeholder="Search">
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
               </template>
-            </q-field>
+              <template v-slot:body-cell-UserID="props">
+                <q-td :props="props">
+                  <q-btn label="Create order" size="xs" @click="openOrderDialog(props.row)"/>
+                </q-td>
+              </template>
+            </q-table>
+          </div>
           
-          <!-- <q-input label="username" v-model="neworder.username"/> -->
-          <q-input label="quantity" type="number" v-model="neworder.quantity"/>
+          <div v-if="user">
+            <div class="text-h5">Step 2: Create the order</div>
+            <q-radio v-model="creation_method" val="ppms" label="On PPMS" />
+            <q-radio v-model="creation_method" val="api" label="Using the API" />
+            <div v-if="creation_method == 'ppms'">
+              <a  :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS.
+            </div>
+            <div v-else>
+              <legend>Create a new order (limited to 1 service)</legend>
+              <q-table
+                title="Services"
+                :data="services"
+                row-key="Service id"
+                :dense="true"
+                :filter="filter"
+                selection="single"
+                :selected.sync="selected"
+                v-if="!service"
+              >
+                <template v-slot:top-left>
+                  <b>Services</b>
+                  <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
+                    <template v-slot:append>
+                      <q-icon name="search" />
+                    </template>
+                  </q-input>
+                </template>
+              </q-table>
+              <q-field label="Service" hint="The PPMS API requires exactly one service to be chosen for new order creation.  After the order is created, services may be modified within PPMS itself.">
+                  <template v-slot:control>
+                    <div class="self-center full-width no-outline" tabindex="0">
+                      <span v-if="service">{{service['Service id']}} - {{service['Name']}} <q-btn label="Change service" @click="selected=[]"/></span>
+                      <span v-else>*Please select a service from the table above!</span>
+                    </div>
+                  </template>
+                </q-field>
+              
+              <!-- <q-input label="username" v-model="neworder.username"/> -->
+              <q-input label="quantity" type="number" v-model="neworder.quantity"/>
+              <q-btn color="primary" label="Create order" @click="createOrder" :disabled="(invalid_order || processing)"/>
+            </div>
+            
+          </div>
           
-        </fieldset>
         </q-card-section>
         <q-card-actions align="right" class="bg-white text-teal">
-          <q-btn color="primary" label="Create order" @click="createOrder" :disabled="(invalid_order || processing)"/> <q-btn label="cancel" color="red" v-close-popup/>
+           <q-btn label="cancel" color="red" v-close-popup/>
         </q-card-actions>
       </q-card>
   </q-dialog>
@@ -100,11 +114,12 @@ export default {
       filter: '',
       user_filter: '',
       neworder: {},
-      user: null,
+      user_selection: [],
       processing: false,
       mounted: false,
       create: false,
-      groupFields: {'admname': 'Admin Name', 'admemail': 'Admin Email', 'headname': 'Head Name', 'unitname': 'Unit Name', 'heademail': 'Head Email', 'department': 'Department', 'affiliation': 'Affiliation', 'institution': 'Institution'}
+      creation_method: 'ppms',
+      groupFields: {'admname': 'Admin Name', 'admemail': 'Admin Email', 'headname': 'Head Name', 'unitname': 'Unit Name', 'heademail': 'Head Email', 'department': 'Department', 'affiliation': 'Affiliation', 'institution': 'Institution', 'creationdate': 'Created'}
     }
   },
   methods: {
@@ -113,6 +128,7 @@ export default {
         this.$q.notify({message: 'Please ensure all order fields are filled out.', type: 'negative'})
       } else {
         this.neworder.serviceid = this.service['Service id']
+        this.neworder.username = this.user.Login
         this.processing = true
         this.$axios
         .post(`/api/plugins/ppms/submissions/${this.submission.id}/create_order/`, this.neworder)
@@ -132,9 +148,27 @@ export default {
         })
       }
     },
-    openOrderDialog(user) {
-      this.user = user
-      this.neworder.username = this.user.Login
+    importOrder (order_id) {
+      if (!order_id) {
+        this.$q.notify({message: 'Please include an order id.', type: 'negative'})
+      } else {
+        this.$axios
+        .post(`/api/plugins/ppms/submissions/${this.submission.id}/import_order/`, {order_id: order_id})
+        .then((response) => {
+          this.orders.push(response.data)
+          this.$q.notify({message: `PPMS Order #${order_id} successfully imported. `, type: 'positive'})
+        })
+        .catch((error) => {
+          if (error.response) {
+            var reason = error.response.data && error.response.data.detail ? error.response.data.detail : ''
+            this.$q.notify({message: 'There was an error importing the order. '+reason, type: 'negative'})
+          }
+        })
+      }
+    },
+    openOrderDialog() {
+      // this.user = user
+      // this.neworder.username = this.user.Login
       this.create = true
     }
   },
@@ -176,7 +210,10 @@ export default {
       return this.selected.length == 1 ? this.selected[0] : null
     },
     'invalid_order': function () {
-      return !this.service || !this.neworder.username || !this.neworder.quantity
+      return !this.service || !this.user || !this.user.Login || !this.neworder.quantity
+    },
+    'user': function () {
+      return this.user_selection.length > 0 ? this.user_selection[0] : null
     }
   },
   components: {

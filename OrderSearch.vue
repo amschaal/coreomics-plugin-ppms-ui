@@ -10,6 +10,7 @@
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-input label="order_id" v-model="order_id"/>
+          <q-input label="comment" v-model="comment"/>
           <q-btn label="Search" @click="search"/>
           <q-table
               title="Orders"
@@ -24,6 +25,11 @@
                     <q-icon name="search" />
                   </template>
                 </q-input>
+              </template>
+              <template v-slot:body-cell-order_date="props">
+                <q-td :props="props">
+                  <q-btn label="Import" size="xs" color="primary" @click="$parent.importOrder(props.row.orderref)" :disabled="$parent.orders.indexOf(props.row.orderref) != -1"/> {{ props.value }}
+                </q-td>
               </template>
             </q-table>
           </q-card-section>
@@ -52,7 +58,7 @@ export default {
   methods: {
     search () {
       this.$axios
-        .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: {comment:'submissions', order_ids: [this.order_id]} })
+        .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: {comment:this.comment, order_ids: this.order_id ? [this.order_id] : []} })
         .then((response) => {
           this.orders = response.data
           this.$q.notify({message: `${this.orders.length} orders found.`, type: 'positive'})
