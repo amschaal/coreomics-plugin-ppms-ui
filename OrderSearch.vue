@@ -9,9 +9,25 @@
           <div class="text-h6">Search orders</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-input label="order_id" v-model="order_id"/>
-          <q-input label="comment" v-model="comment"/>
-          <q-btn label="Search" @click="search"/>
+          <div class="row">
+            <q-input label="order_id" v-model="order_id" class="col" outlined/>
+            <q-input label="comment" v-model="comment" class="col" outlined/>
+            <q-input outlined v-model="date_gte" label="Created after">
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                    <q-date v-model="date_gte" mask="YYYY-MM-DD">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+            <div class="row"><q-btn label="Search" @click="search"/></div>
+          </div>
+          
           <q-table
               title="Orders"
               :data="orders"
@@ -33,8 +49,8 @@
               </template>
             </q-table>
           </q-card-section>
-          <q-card-actions align="right" class="bg-white text-teal">
-            <q-btn label="cancel" color="red" v-close-popup/>
+          <q-card-actions align="right" class="bg-white">
+            <q-btn label="dismiss" v-close-popup/>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -58,7 +74,7 @@ export default {
   methods: {
     search () {
       this.$axios
-        .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: {comment:this.comment, order_ids: this.order_id ? [this.order_id] : []} })
+        .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: {date_gte: this.date_gte, comment:this.comment, order_ids: this.order_id ? [this.order_id] : []} })
         .then((response) => {
           this.orders = response.data
           this.$q.notify({message: `${this.orders.length} orders found.`, type: 'positive'})

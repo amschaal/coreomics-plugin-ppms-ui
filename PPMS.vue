@@ -17,7 +17,7 @@
     >
       <q-card style="width: 80vw; max-width: 80vw;">
         <q-card-section>
-          <div class="text-h4">Create a new order in PPMS</div>
+          <div class="text-h4">Create a new order in PPMS.</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
           <div>
@@ -39,11 +39,11 @@
                   </template>
                 </q-input>
               </template>
-              <template v-slot:body-cell-UserID="props">
+              <!-- <template v-slot:body-cell-UserID="props">
                 <q-td :props="props">
                   <q-btn label="Create order" size="xs" @click="openOrderDialog(props.row)"/>
                 </q-td>
-              </template>
+              </template> -->
             </q-table>
           </div>
           
@@ -51,11 +51,11 @@
             <div class="text-h5">Step 2: Create the order</div>
             <q-radio v-model="creation_method" val="ppms" label="On PPMS" />
             <q-radio v-model="creation_method" val="api" label="Using the API" />
-            <div v-if="creation_method == 'ppms'">
-              <a  :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS.
+            <div class="text-h5" v-if="creation_method == 'ppms'">
+              <a  :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS. Once the order is created, return here to import the newly created order using the "Import Orders" button.
             </div>
             <div v-else>
-              <legend>Create a new order (limited to 1 service)</legend>
+              <legend>Creating a new order via the API is limited to 1 service.  For more services, please create the order using the PPMS site.</legend>
               <q-table
                 title="Services"
                 :data="services"
