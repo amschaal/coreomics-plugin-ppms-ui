@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <q-btn label="Import orders" @click="dialog=true"/>
+  <span>
+    <q-btn label="Import orders" color="primary" @click="dialog=true"/>
     <q-dialog
       v-model="dialog"
     >
@@ -44,7 +44,7 @@
               </template>
               <template v-slot:body-cell-order_date="props">
                 <q-td :props="props">
-                  <q-btn label="Import" size="xs" color="primary" @click="$parent.importOrder(props.row.orderref)" :disabled="$parent.orders.indexOf(props.row.orderref) != -1"/> {{ props.value }}
+                  <q-btn label="Import" size="xs" color="primary" @click="$parent.importOrder(props.row.orderref)" :disabled="orderExists(props.row.orderref)"/> {{ props.value }}
                 </q-td>
               </template>
             </q-table>
@@ -54,7 +54,7 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -85,6 +85,9 @@ export default {
             this.$q.notify({message: 'There was an error searching for orders. ' + reason, type: 'negative'})
           }
         })
+      },
+      orderExists (order_id) {
+        return this.$parent.orders.filter(o=>o.orderref==order_id).length > 0
       }
   },
   mounted () {

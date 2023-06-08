@@ -6,12 +6,27 @@
         <span v-for="v,k in groupFields"><b>{{ v }}:</b>{{ submission.payment.group[k] }}<br></span>
       </div>
       <h3>Orders</h3>
-      <ul>
+      <!-- <ul>
         <li v-for="(o, i) in orders"><a target="_blank" :href="`https://ppms.us/ucdavis-test/vorder/?orderid=${o}`">Order #{{o}}</a></li>
-      </ul>
+      </ul> -->
+      Orders: {{ orders }}
+      <q-table
+          title="Orders"
+          :data="orders"
+          row-key="orderref"
+          :dense="true"
+        >
+          <template v-slot:top-right>
+              <span><q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission"/></span>
+          </template>
+          <template v-slot:body-cell-orderref="props">
+            <q-td :props="props">
+              <a target="_blank" :href="orderURL(props.value)">{{ props.value }}</a>
+            </q-td>
+          </template>
+        </q-table>
     </div>
-    <OrderSearch :submission="submission"/>
-    <q-btn label="Create order" @click="openOrderDialog()"/>
+    
     <q-dialog
       v-model="create"
     >
@@ -155,7 +170,7 @@ export default {
         this.$axios
         .post(`/api/plugins/ppms/submissions/${this.submission.id}/import_order/`, {order_id: order_id})
         .then((response) => {
-          this.orders.push(response.data)
+          this.orders.push(...response.data)
           this.$q.notify({message: `PPMS Order #${order_id} successfully imported. `, type: 'positive'})
         })
         .catch((error) => {
@@ -165,6 +180,9 @@ export default {
           }
         })
       }
+    },
+    orderURL (order_id) {
+        return `https://ppms.us/ucdavis-test/vorder/?orderid=${order_id}`
     },
     openOrderDialog() {
       // this.user = user
@@ -187,7 +205,7 @@ export default {
     this.$axios
         .get(`/api/plugins/ppms/submissions/${this.submission.id}/orders/`)
         .then((response) => {
-          this.orders = response.data.orders
+          this.orders = response.data
         })
         .catch((error) => {
           if (error.response && error.response.status !== 404) {
