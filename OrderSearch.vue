@@ -9,9 +9,7 @@
           <div class="text-h6">Search orders</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <div class="row">
-            <q-input label="order_id" v-model="order_id" class="col" outlined/>
-            <q-input label="comment" v-model="comment" class="col" outlined/>
+          <div class="row" v-if="!search_order">
             <q-input outlined v-model="date_gte" label="Created after">
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
@@ -25,9 +23,16 @@
                 </q-icon>
               </template>
             </q-input>
-            <div class="row"><q-btn label="Search" @click="search"/></div>
+            <q-radio v-model="comment" :val="submission.id" :label="`Comment contains Submission ID (${submission.id})`" />
+            <q-radio v-model="comment" :val="submission.internal_id" label="Line" :label="`Comment contains assigned Project ID (${submission.internal_id})`"/>
+            <q-radio v-model="comment" val="" label="No/Other comment" />
+            <q-input label="comment" v-model="other_comment" class="col" outlined v-if="!comment"/>
           </div>
-          
+          <div class="row">
+            <q-checkbox v-model="search_order" label="OR search by Order ID." class="col"/>
+            <q-input label="order_id" v-model="order_id" class="col" outlined v-if="search_order"/>
+          </div>
+          <div><q-btn label="Search" @click="search"/></div>
           <q-table
               title="Orders"
               :data="orders"
@@ -36,7 +41,7 @@
               :filter="filter"
             >
               <template v-slot:top-left>
-                <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
+                <q-input borderless dense debounce="300" v-model="filter" placeholder="Filter results">
                   <template v-slot:append>
                     <q-icon name="search" />
                   </template>
@@ -64,17 +69,26 @@ export default {
     return {
       dialog: false,
       filter: '',
-      date_gte: null,
+      date_gte: this.submission.submitted.substr(0,10),
       order_ids: [],
       order_id: null,
       comment: '',
+      other_comment: '',
+      search_order: false,
       orders: []
     }
   },
   methods: {
     search () {
+      var params = {}
+      if (this.search_order) {
+        params.order_ids = this.order_id ? [this.order_id] : []
+      } else {
+        var comment = this.comment || this.other_comment
+        params = {date_gte: this.date_gte, comment:comment}
+      }
       this.$axios
-        .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: {date_gte: this.date_gte, comment:this.comment, order_ids: this.order_id ? [this.order_id] : []} })
+        .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: params })
         .then((response) => {
           this.orders = response.data
           this.$q.notify({message: `${this.orders.length} orders found.`, type: 'positive'})
