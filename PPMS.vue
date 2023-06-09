@@ -9,15 +9,16 @@
       <!-- <ul>
         <li v-for="(o, i) in orders"><a target="_blank" :href="`https://ppms.us/ucdavis-test/vorder/?orderid=${o}`">Order #{{o}}</a></li>
       </ul> -->
-      Orders: {{ orders }}
       <q-table
           title="Orders"
           :data="orders"
           row-key="orderref"
           :dense="true"
         >
-          <template v-slot:top-right>
-              <span><q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission"/></span>
+          <template v-slot:body-cell-order_date="props">
+            <q-td :props="props">
+              <q-btn label="Remove" size="sm" @click="removeOrder(props.row)" color="red"/>{{ props.value }}
+            </q-td>
           </template>
           <template v-slot:body-cell-orderref="props">
             <q-td :props="props">
@@ -25,6 +26,7 @@
             </q-td>
           </template>
         </q-table>
+        <q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission"/>
     </div>
     
     <q-dialog
@@ -183,6 +185,22 @@ export default {
     },
     orderURL (order_id) {
         return `https://ppms.us/ucdavis-test/vorder/?orderid=${order_id}`
+    },
+    removeOrder (order) {
+      if (!confirm(`Are you sure you want to remove the PPMS order ${order.orderref} from this submission?`))
+        return
+      this.$axios
+        .post(`/api/plugins/ppms/submissions/${this.submission.id}/remove_order/`, {order_id: order.orderref})
+        .then((response) => {
+          this.$q.notify({message: `PPMS Order #${order.orderref} successfully removed. `, type: 'positive'})
+          this.orders.splice(this.orders.indexOf(order),1)
+        })
+        .catch((error) => {
+          if (error.response) {
+            var reason = error.response.data && error.response.data.detail ? error.response.data.detail : ''
+            this.$q.notify({message: 'There was an error removing the order. '+reason, type: 'negative'})
+          }
+        })
     },
     openOrderDialog() {
       // this.user = user
