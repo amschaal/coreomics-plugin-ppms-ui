@@ -26,7 +26,7 @@
             </q-td>
           </template>
         </q-table>
-        <q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission"/>
+        <q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission" :accounts="accounts"/>
     </div>
     
     <q-dialog

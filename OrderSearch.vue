@@ -28,6 +28,9 @@
             <q-radio v-model="comment" val="" label="No/Other comment" />
             <q-input label="comment" v-model="other_comment" class="col" outlined v-if="!comment"/>
           </div>
+          <div class="row" v-if="accounts">
+            Group/PI: <q-radio v-model="group" :val="null" label="Any" /><span v-for="a in accounts"><q-radio v-model="group" :val="a.GroupPIUnitID" :label="a.GroupPIName" /></span>
+          </div>
           <div class="row">
             <q-checkbox v-model="search_order" label="OR search by Order ID." class="col"/>
             <q-input label="order_id" v-model="order_id" class="col" outlined v-if="search_order"/>
@@ -64,7 +67,7 @@
 
 <script>
 export default {
-  props: ['submission', 'config'],
+  props: ['submission', 'accounts', 'config'],
   data () {
     return {
       dialog: false,
@@ -74,6 +77,7 @@ export default {
       order_id: null,
       comment: '',
       other_comment: '',
+      group: null,
       search_order: false,
       orders: []
     }
