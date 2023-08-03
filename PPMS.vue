@@ -17,7 +17,7 @@
         >
           <template v-slot:body-cell-order_date="props">
             <q-td :props="props">
-              <q-btn label="Remove" size="sm" @click="removeOrder(props.row)" color="red"/>{{ props.value }}
+              <q-btn label="Remove" size="sm" @click="removeOrder(props.row)" color="red" v-if="is_admin"/>{{ props.value }}
             </q-td>
           </template>
           <template v-slot:body-cell-orderref="props">
@@ -26,11 +26,14 @@
             </q-td>
           </template>
         </q-table>
-        <q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission" :accounts="accounts"/>
+        <div v-if="is_admin">
+          <q-btn label="Create order" color="positive" @click="openOrderDialog()"/> <OrderSearch :submission="submission" :accounts="accounts"/>
+        </div>
     </div>
     
     <q-dialog
       v-model="create"
+      v-if="is_admin"
     >
       <q-card style="width: 80vw; max-width: 80vw;">
         <q-card-section>
@@ -211,16 +214,6 @@ export default {
   mounted () {
     console.log('services', this.services) // this should only happen once thanks to keep-alive, but it doesn't appear to be the case
     this.$axios
-        .get(`/api/plugins/ppms/submissions/${this.submission.id}/services/`)
-        .then((response) => {
-          this.services = response.data.services
-        })
-        .catch((error) => {
-          if (error.response && error.response.status !== 404) {
-            this.$q.notify({message: 'There was an error retrieving the services.', type: 'negative'})
-          }
-        })
-    this.$axios
         .get(`/api/plugins/ppms/submissions/${this.submission.id}/orders/`)
         .then((response) => {
           this.orders = response.data
@@ -230,16 +223,28 @@ export default {
             this.$q.notify({message: 'There was an error retrieving the orders for this submission.', type: 'negative'})
           }
         })
+    if (this.is_admin) {
       this.$axios
-        .get(`/api/plugins/ppms/submissions/${this.submission.id}/user_info/`)
-        .then((response) => {
-          this.accounts = response.data
-        })
-        .catch((error) => {
-          if (error.response && error.response.status !== 404) {
-            this.$q.notify({message: 'Unable to fetch user account info using PI and submitter emails.', type: 'negative'})
-          }
-        })
+          .get(`/api/plugins/ppms/submissions/${this.submission.id}/services/`)
+          .then((response) => {
+            this.services = response.data.services
+          })
+          .catch((error) => {
+            if (error.response && error.response.status !== 404) {
+              this.$q.notify({message: 'There was an error retrieving the services.', type: 'negative'})
+            }
+          })
+      this.$axios
+          .get(`/api/plugins/ppms/submissions/${this.submission.id}/user_info/`)
+          .then((response) => {
+            this.accounts = response.data
+          })
+          .catch((error) => {
+            if (error.response && error.response.status !== 404) {
+              this.$q.notify({message: 'Unable to fetch user account info using PI and submitter emails.', type: 'negative'})
+            }
+          })
+      }
   },
   computed: {
     'service': function () {
@@ -250,6 +255,9 @@ export default {
     },
     'user': function () {
       return this.user_selection.length > 0 ? this.user_selection[0] : null
+    },
+    'is_admin': function () {
+      return this.submission.permissions.indexOf('ADMIN') != -1
     }
   },
   components: {
