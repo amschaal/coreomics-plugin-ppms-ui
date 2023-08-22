@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <div if submission.payment.group>
+      <div v-if="submission.payment.group">
         <h3>Group</h3>
         <span v-for="v,k in groupFields"><b>{{ v }}:</b>{{ submission.payment.group[k] }}<br></span>
       </div>

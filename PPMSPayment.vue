@@ -6,10 +6,10 @@
         type="text"
         bottom-slots
         stack-label
-        v-model="value.pi_email"
-        label="PI Email/Login for PPMS"
-        :error="hasError('pi_email')"
-        :error-message="errorMessage('pi_email')"/>
+        v-model="value.ppms_email"
+        label="PPMS Email/Login for PPMS"
+        :error="hasError('ppms_email')"
+        :error-message="errorMessage('ppms_email')"/>
     </div>
   </div>
 </template>
