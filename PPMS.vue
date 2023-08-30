@@ -153,7 +153,7 @@ export default {
         this.$axios
         .post(`/api/plugins/ppms/submissions/${this.submission.id}/create_order/`, this.neworder)
         .then((response) => {
-          this.orders = response.data.plugin_data.orders
+          this.orders = response.data.plugin_data.order_details
           this.processing = false
           this.neworder = {}
           this.$q.notify({message: `PPMS Order #${response.data.order} successfully created. `, type: 'positive'})
