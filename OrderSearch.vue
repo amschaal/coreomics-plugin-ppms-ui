@@ -28,7 +28,7 @@
             <q-radio v-model="comment" val="" label="No/Other comment" />
             <q-input label="comment" v-model="other_comment" class="col" outlined v-if="!comment"/>
           </div>
-          <div class="row" v-if="accounts">
+          <div class="row" v-if="accounts && !search_order">
             Group/PI: <q-radio v-model="group" :val="null" label="Any" /><span v-for="a in accounts"><q-radio v-model="group" :val="a.GroupPIUnitID" :label="a.GroupPIName" /></span>
           </div>
           <div class="row">
@@ -89,7 +89,7 @@ export default {
         params.order_ids = this.order_id ? [this.order_id] : []
       } else {
         var comment = this.comment || this.other_comment
-        params = {date_gte: this.date_gte, comment:comment}
+        params = {date_gte: this.date_gte, comment:comment, unit_id: this.group || 0}
       }
       this.$axios
         .get(`/api/plugins/ppms/submissions/${this.submission.id}/search_orders/`, { params: params })
