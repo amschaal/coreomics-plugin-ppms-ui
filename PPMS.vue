@@ -72,7 +72,7 @@
             <q-radio v-model="creation_method" val="ppms" label="On PPMS" />
             <q-radio v-model="creation_method" val="api" label="Using the API" />
             <div class="text-h5" v-if="creation_method == 'ppms'">
-              <a  :href="`https://ppms.us/ucdavis-test/order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS. Once the order is created, return here to import the newly created order using the "Import Orders" button.
+              <a  :href="`${ppms_url}order/?userid=${user.UserID}`" target="_blank">Create order</a> directly in PPMS. Once the order is created, return here to import the newly created order using the "Import Orders" button.
             </div>
             <div v-else>
               <legend>Creating a new order via the API is limited to 1 service.  For more services, please create the order using the PPMS site.</legend>
@@ -139,7 +139,8 @@ export default {
       mounted: false,
       create: false,
       creation_method: 'ppms',
-      groupFields: {'admname': 'Admin Name', 'admemail': 'Admin Email', 'headname': 'Head Name', 'unitname': 'Unit Name', 'heademail': 'Head Email', 'department': 'Department', 'affiliation': 'Affiliation', 'institution': 'Institution', 'creationdate': 'Created'}
+      groupFields: {'admname': 'Admin Name', 'admemail': 'Admin Email', 'headname': 'Head Name', 'unitname': 'Unit Name', 'heademail': 'Head Email', 'department': 'Department', 'affiliation': 'Affiliation', 'institution': 'Institution', 'creationdate': 'Created'},
+      ppms_url: this.config.ppms_url || 'https://ppms.us/ucdavis/'
     }
   },
   methods: {
@@ -187,7 +188,7 @@ export default {
       }
     },
     orderURL (order_id) {
-        return `https://ppms.us/ucdavis-test/vorder/?orderid=${order_id}`
+        return `${this.ppms_url}vorder/?orderid=${order_id}`
     },
     removeOrder (order) {
       if (!confirm(`Are you sure you want to remove the PPMS order ${order.orderref} from this submission?`))
