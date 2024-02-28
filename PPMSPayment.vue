@@ -11,6 +11,17 @@
         :error="hasError('ppms_email')"
         :error-message="errorMessage('ppms_email')"/>
     </div>
+    <div class="col-sm-12 col-md-6 col-lg-3">
+      <q-input 
+        type="text"
+        bottom-slots
+        stack-label
+        v-model="value.account"
+        label="PPMS Financial Account"
+        hint="If you have more than one financial account number in PPMS, please specify which to use."
+        :error="hasError('account')"
+        :error-message="errorMessage('account')"/>
+    </div>
   </div>
 </template>
 
