@@ -7,7 +7,7 @@
         bottom-slots
         stack-label
         v-model="value.ppms_email"
-        label="PPMS Email/Login for PPMS"
+        label="PPMS Login ID (usually your email)"
         :error="hasError('ppms_email')"
         :error-message="errorMessage('ppms_email')"/>
     </div>
@@ -18,7 +18,7 @@
         stack-label
         v-model="value.account"
         label="PPMS Financial Account"
-        hint="If you have more than one financial account number in PPMS, please specify which to use."
+        hint="If you have more than one financial account number in PPMS, please specify which to use.  If not applicable, please enter 'n/a'."
         :error="hasError('account')"
         :error-message="errorMessage('account')"/>
     </div>
