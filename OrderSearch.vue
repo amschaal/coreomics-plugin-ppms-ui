@@ -35,7 +35,7 @@
             <q-checkbox v-model="search_order" label="OR search by Order ID." class="col"/>
             <q-input label="order_id" v-model="order_id" class="col" outlined v-if="search_order"/>
           </div>
-          <div><q-btn label="Search" @click="search"/></div>
+          <div><q-btn label="Search" @click="search" color="primary"/></div>
           <q-table
               title="Orders"
               :data="orders"
